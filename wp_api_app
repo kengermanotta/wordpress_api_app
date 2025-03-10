@@ -1,0 +1,44 @@
+<?php
+/**
+ * Plugin Name: Wordpress Block Api App 
+ * Description: a api for block and protect your site with apikey and block acess 
+ * Author:github.com/kengermanotta Kengermanotta.com
+ */
+
+if (!defined('ABSPATH')) {
+    exit; // Segurança
+}
+
+// 🔑 Defina sua chave secreta aqui
+define('CHAVE_SECRETA', '123456789');
+
+// Definir um nome para o cookie
+define('COOKIE_ACESSO', 'acesso_secreto');
+
+// Função para verificar se a chave está presente
+function verificar_acesso_api() {
+    if (is_admin() || strpos($_SERVER['REQUEST_URI'], 'wp-login.php') !== false) {
+        // Se o cookie de acesso estiver presente e válido, permitir o acesso
+        if (isset($_COOKIE[COOKIE_ACESSO]) && $_COOKIE[COOKIE_ACESSO] === CHAVE_SECRETA) {
+            return; // Já autenticado, não faz mais nada
+        }
+
+        // Obtém a chave da URL ou do cabeçalho
+        $chave_url = isset($_GET['chave']) ? $_GET['chave'] : '';
+        $headers = getallheaders();
+        $chave_header = isset($headers['Authorization']) ? trim(str_replace('Bearer ', '', $headers['Authorization'])) : '';
+
+        // Verifica se a chave está correta
+        if ($chave_url === CHAVE_SECRETA || $chave_header === CHAVE_SECRETA) {
+            // Define um cookie válido por 1 hora
+            setcookie(COOKIE_ACESSO, CHAVE_SECRETA, time() + 3600, "/");
+            return;
+        }
+
+        // Se não passar na autenticação, bloquear o acesso
+        wp_die("Acesso negado! Insira a chave na URL: ?chave=sua-chave-secreta", "403 Forbidden", array('response' => 403));
+    }
+}
+
+// Aplica a verificação no login e no painel admin
+add_action('init', 'verificar_acesso_api');
