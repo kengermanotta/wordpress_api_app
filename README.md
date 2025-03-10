@@ -27,3 +27,6 @@ To access the admin panel, use:
 https://yourwebsite.com/wp-admin/?key=your-secret-key
 
 After entering the key once, you can navigate normally for 1 hour before needing to re-authenticate.
+
+the secret pre-load apikey are: 12345678 and you can charge it in the code 
+remenber: in my use : wp-content folder > "folder you choose the name for the plugin" in my case; wp_api_app > here code
